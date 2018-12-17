@@ -1,7 +1,5 @@
 package org.javabrain.annotation;
 
-import org.javabrain.enums.JsonDataType;
-
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;

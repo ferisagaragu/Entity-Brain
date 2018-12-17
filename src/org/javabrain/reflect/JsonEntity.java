@@ -1,7 +1,7 @@
 package org.javabrain.reflect;
 
 import org.javabrain.annotation.*;
-import org.javabrain.enums.JsonDataType;
+import org.javabrain.enums.JsonStructure;
 import org.javabrain.enums.JsonRestriction;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -19,12 +19,16 @@ public class JsonEntity {
         return recursiveInject(clazz);
     }
 
+    public static List inject(Class clazz,Object obj){
+        return recursiveInject(clazz,obj);
+    }
+
     public static Object simpleInject(Class clazz) {
         return recursiveInject(clazz).get(0);
     }
 
-    public static String stringify(Object o) {
-        return recursiveStringify(o,"");
+    public static Object simpleInject(Class clazz,Object obj) {
+        return recursiveInject(clazz,obj).get(0);
     }
 
     public static boolean merge(Object o) {
@@ -38,7 +42,7 @@ public class JsonEntity {
         Json json = (Json) o.getClass().getAnnotation(Json.class);
 
         if (json != null) {
-            switch (json.type()) {
+            switch (json.access()) {
                 case EXTERNAL:
 
                     if (isRestrictionsCorrect(finalObj)) {
@@ -63,6 +67,10 @@ public class JsonEntity {
         return false;
     }
 
+    public static String stringify(Object o) {
+        return recursiveStringify(o,"");
+    }
+
 
 
 
@@ -74,10 +82,10 @@ public class JsonEntity {
         List list = new ArrayList();
         Json json = (Json) clazz.getAnnotation(Json.class);
 
-        switch (json.type()) {
+        switch (json.access()) {
             case INTERNAL:
 
-                switch (json.dataType()) {
+                switch (json.structure()) {
                     case JSON_ARRAY:
                         JSONArray array = getJsonArrayData(json.load());
                         putJsonArrayInObject(clazz, array, list);
@@ -92,7 +100,7 @@ public class JsonEntity {
 
             case EXTERNAL:
 
-                switch (json.dataType()) {
+                switch (json.structure()) {
                     case JSON_ARRAY:
                         JSONArray array = getExternalJsonArrayData(json.load());
                         putJsonArrayInObject(clazz, array, list);
@@ -108,17 +116,37 @@ public class JsonEntity {
             /*case DATA_BASE:
                 break;
             case WEB_SERVICE:
-                break;
+                break;*/
 
             case OBJECT:
-                break;*/
+
+                try {
+                    JSONParser parser = new JSONParser();
+
+                    switch (json.structure()) {
+                        case JSON_ARRAY:
+                            JSONArray array = (JSONArray) parser.parse(objects[0].toString());
+                            putJsonArrayInObject(clazz, array, list);
+                            break;
+
+                        case JSON_OBJECT:
+                            JSONObject object = (JSONObject) parser.parse(objects[0].toString());
+                            putJsonObjectInObject(clazz, object, list);
+                            break;
+                    }
+
+                } catch (ParseException ex) {
+                    System.err.println(ex.getMessage());
+                }
+
+                break;
 
             case NESTED:
 
                 try {
                     JSONParser parser = new JSONParser();
 
-                    switch (json.dataType()) {
+                    switch (json.structure()) {
                         case JSON_ARRAY:
                             JSONArray array = (JSONArray) parser.parse(objects[0].toString());
                             putJsonArrayInObject(clazz, array, list);
@@ -320,7 +348,7 @@ public class JsonEntity {
 
             if (key != null) {
                 if (inject != null) {
-                    if (((Json) inject.classType().getAnnotation(Json.class)).dataType() != JsonDataType.JSON_OBJECT) {
+                    if (((Json) inject.classType().getAnnotation(Json.class)).structure() != JsonStructure.JSON_OBJECT) {
                         field.set(entity, JsonEntity.recursiveInject(inject.classType(), dataJ.get(key.name())));
                     } else {
                         field.set(entity, JsonEntity.recursiveInject(inject.classType(), dataJ.get(key.name())).get(0));

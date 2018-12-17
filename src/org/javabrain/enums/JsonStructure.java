@@ -1,6 +1,6 @@
 package org.javabrain.enums;
 
-public enum JsonDataType {
+public enum JsonStructure {
     JSON_ARRAY,
     JSON_OBJECT
 }

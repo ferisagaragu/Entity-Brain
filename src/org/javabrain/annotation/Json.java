@@ -1,7 +1,7 @@
 package org.javabrain.annotation;
 
-import org.javabrain.enums.JsonDataType;
-import org.javabrain.enums.JsonType;
+import org.javabrain.enums.JsonStructure;
+import org.javabrain.enums.JsonAccess;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -12,6 +12,6 @@ import java.lang.annotation.Target;
 @Target({ElementType.TYPE})
 public @interface Json {
     String load() default "";
-    JsonType type();
-    JsonDataType dataType() default JsonDataType.JSON_ARRAY;
+    JsonAccess access();
+    JsonStructure structure() default JsonStructure.JSON_ARRAY;
 }
